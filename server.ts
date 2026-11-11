@@ -146,6 +146,8 @@ app.put('/api/admin/config', requireAdminAuth, async (req: AuthenticatedRequest,
       color_accent,
       player_title,
       player_subtitle,
+      stream_format,
+      stream_url_fallback,
     } = req.body;
 
     if (!station_name || !stream_url) {
@@ -168,6 +170,8 @@ app.put('/api/admin/config', requireAdminAuth, async (req: AuthenticatedRequest,
       color_accent: color_accent !== undefined ? color_accent.trim() : undefined,
       player_title: player_title !== undefined ? player_title.trim() : undefined,
       player_subtitle: player_subtitle !== undefined ? player_subtitle.trim() : undefined,
+      stream_format: stream_format !== undefined ? stream_format.trim() : undefined,
+      stream_url_fallback: stream_url_fallback !== undefined ? stream_url_fallback.trim() : undefined,
     });
 
     res.json({
@@ -218,7 +222,7 @@ app.post('/api/auth/change-password', requireAdminAuth, async (req: Authenticate
   }
 });
 
-// Test streaming URL connectivity
+// Test streaming URL connectivity with OGG/MP3/AAC detection
 app.post('/api/admin/test-stream', requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { url } = req.body;
@@ -227,28 +231,31 @@ app.post('/api/admin/test-stream', requireAdminAuth, async (req: Request, res: R
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; LaHoraDelZorzal/1.0)',
-        'Range': 'bytes=0-1024',
+        'Range': 'bytes=0-2048',
+        'Icy-MetaData': '1',
       },
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
 
-    const contentType = response.headers.get('content-type') || '';
+    const contentType = (response.headers.get('content-type') || '').toLowerCase();
     const status = response.status;
 
-    const isAudio = contentType.includes('audio') || contentType.includes('mpeg') || contentType.includes('aac') || contentType.includes('ogg') || status === 200 || status === 206;
+    const isOgg = contentType.includes('ogg') || contentType.includes('vorbis') || contentType.includes('opus') || url.toLowerCase().includes('.ogg');
+    const isAudio = contentType.includes('audio') || contentType.includes('mpeg') || contentType.includes('aac') || isOgg || status === 200 || status === 206;
 
     res.json({
       valid: isAudio,
       status,
-      contentType,
+      contentType: contentType || (isOgg ? 'audio/ogg' : 'audio/mpeg'),
+      detectedFormat: isOgg ? 'OGG (Vorbis/Opus)' : contentType.includes('aac') ? 'AAC' : 'MP3 / Audio Stream',
       statusText: response.statusText,
     });
   } catch (error: any) {
@@ -256,6 +263,69 @@ app.post('/api/admin/test-stream', requireAdminAuth, async (req: Request, res: R
       valid: false,
       error: error.name === 'AbortError' ? 'Tiempo de espera agotado al conectar al servidor de audio' : error.message,
     });
+  }
+});
+
+// Stream proxy endpoint to solve Mixed Content (HTTP stream on HTTPS site) or CORS issues
+app.get('/api/stream/proxy', async (req: Request, res: Response) => {
+  const targetUrl = req.query.url as string;
+  if (!targetUrl) {
+    return res.status(400).send('URL requerida');
+  }
+
+  try {
+    const parsed = new URL(targetUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return res.status(400).send('Protocolo no soportado');
+    }
+
+    const controller = new AbortController();
+    req.on('close', () => controller.abort());
+
+    const streamResponse = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; LaHoraDelZorzalProxy/1.0)',
+        'Icy-MetaData': '0',
+      },
+      signal: controller.signal,
+    });
+
+    if (!streamResponse.ok && streamResponse.status !== 206) {
+      return res.status(streamResponse.status).send('Error conectando a la transmisión');
+    }
+
+    const contentType = streamResponse.headers.get('content-type') || 'audio/ogg';
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Access-Control-Allow-Origin': '*',
+    });
+
+    if (streamResponse.body) {
+      // @ts-ignore Node Readable Stream
+      const reader = streamResponse.body.getReader();
+      const pump = async () => {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            res.write(value);
+          }
+          res.end();
+        } catch (streamErr) {
+          res.end();
+        }
+      };
+      pump();
+    } else {
+      res.end();
+    }
+  } catch (err: any) {
+    if (!res.headersSent) {
+      res.status(502).send('Error en proxy de audio: ' + (err.message || 'Fallo'));
+    }
   }
 });
 
