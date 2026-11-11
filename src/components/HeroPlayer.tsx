@@ -71,20 +71,20 @@ export const HeroPlayer: React.FC<HeroPlayerProps> = ({
           {/* Quality & Format */}
           <div className="flex items-center gap-2 text-[11px] text-[#D4AF37]/80 uppercase tracking-widest font-medium">
             <Radio className="w-3.5 h-3.5" />
-            <span>Transmisión Digital 24/7</span>
+            <span>Transmisión 24/7</span>
           </div>
         </div>
 
         {/* Emisora Identity */}
         <div className="mb-6 space-y-2">
           <p className="text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase text-[#D4AF37]">
-            {config.slogan || 'EL CANTO DE NUESTRA TIERRA'}
+            {config.slogan || '24 hs con lo mejor del folklore paraguayo'}
           </p>
           <h1 className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[#FAF7F2] drop-shadow-md">
             {config.station_name || 'LA HORA DEL ZORZAL'}
           </h1>
           <p className="text-sm md:text-base text-[#FAF7F2]/80 font-normal">
-            Música paraguaya las 24 horas · Polcas, guaranias y folclore
+            Programa de música y cultura del py con Rubén Sosa
           </p>
         </div>
 
