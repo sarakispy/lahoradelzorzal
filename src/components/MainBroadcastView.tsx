@@ -37,6 +37,8 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
   const playerTitle = config.player_title || 'SEÑAL EN DIRECTO';
   const playerSubtitle = config.player_subtitle || '24 hs con lo mejor del folklore paraguayo';
 
+  const isOgg = config.stream_format === 'ogg' || (config.stream_url && config.stream_url.toLowerCase().includes('ogg'));
+
   return (
     <div className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 md:py-8 flex-1 flex flex-col justify-center">
       {/* Decorative subtle string lines backdrop */}
@@ -82,7 +84,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
 
             <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[var(--color-dorado,#D4AF37)]/80 uppercase tracking-widest font-medium">
               <Radio className="w-3.5 h-3.5" />
-              <span>Transmisión Digital 24/7</span>
+              <span>{isOgg ? 'Transmisión OGG 24/7' : 'Transmisión Digital 24/7'}</span>
             </div>
           </div>
 
@@ -168,9 +170,14 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
               )}
 
               {isPlaying && (
-                <p className="text-xs text-[#FAF7F2] font-medium tracking-wide">
-                  Reproduciendo señal en directo · Audio HD
-                </p>
+                <div className="text-xs text-[#FAF7F2] font-medium tracking-wide flex items-center justify-center gap-2 flex-wrap">
+                  <span>Reproduciendo señal en directo · Audio HD</span>
+                  {isOgg && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono font-semibold">
+                      OGG VORBIS
+                    </span>
+                  )}
+                </div>
               )}
 
               {!isLoading && !isPlaying && !isError && (

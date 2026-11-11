@@ -71,7 +71,11 @@ export const HeroPlayer: React.FC<HeroPlayerProps> = ({
           {/* Quality & Format */}
           <div className="flex items-center gap-2 text-[11px] text-[#D4AF37]/80 uppercase tracking-widest font-medium">
             <Radio className="w-3.5 h-3.5" />
-            <span>Transmisión Digital 24/7</span>
+            <span>
+              {(config.stream_format === 'ogg' || (config.stream_url && config.stream_url.toLowerCase().includes('ogg')))
+                ? 'Transmisión OGG 24/7'
+                : 'Transmisión Digital 24/7'}
+            </span>
           </div>
         </div>
 

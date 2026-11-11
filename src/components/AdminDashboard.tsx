@@ -103,6 +103,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [logoUrl, setLogoUrl] = useState(config.logo_url || '');
   const [colorPrimary, setColorPrimary] = useState(config.color_primary || '#4A0E17');
   const [colorAccent, setColorAccent] = useState(config.color_accent || '#D4AF37');
+  const [streamFormat, setStreamFormat] = useState<string>(config.stream_format || 'ogg');
+  const [streamUrlFallback, setStreamUrlFallback] = useState<string>(config.stream_url_fallback || '');
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
@@ -114,6 +116,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     valid: boolean;
     status?: number;
     contentType?: string;
+    detectedFormat?: string;
     error?: string;
   } | null>(null);
 
@@ -139,6 +142,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setLogoUrl(config.logo_url || '');
     setColorPrimary(config.color_primary || '#4A0E17');
     setColorAccent(config.color_accent || '#D4AF37');
+    setStreamFormat(config.stream_format || 'ogg');
+    setStreamUrlFallback(config.stream_url_fallback || '');
   }, [config]);
 
   // Helper to safely parse JSON without throwing "Unexpected end of JSON input"
@@ -234,6 +239,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       logo_url: logoUrl.trim(),
       color_primary: colorPrimary.trim(),
       color_accent: colorAccent.trim(),
+      stream_format: streamFormat,
+      stream_url_fallback: streamUrlFallback.trim(),
     };
 
     try {
@@ -694,45 +701,105 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Streaming URL */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs uppercase tracking-wider text-stone-400 font-medium">
-                    URL del Streaming de Audio (MP3 / AAC)
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleTestStream}
-                    disabled={isTestingStream || !streamUrl}
-                    className="text-xs text-[#D4AF37] hover:underline inline-flex items-center gap-1 font-medium disabled:opacity-50"
-                  >
-                    <Activity className="w-3.5 h-3.5" />
-                    <span>{isTestingStream ? 'Probando...' : 'Probar señal'}</span>
-                  </button>
+              {/* Streaming Format & URL Configuration (OGG / MP3 / AAC) */}
+              <div className="p-4 rounded-2xl bg-[#121013]/60 border border-stone-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-semibold text-[#D4AF37] uppercase tracking-wider">
+                      Transmisión de Audio y Formato
+                    </h3>
+                    <p className="text-[11px] text-stone-400 mt-0.5">
+                      Transmisión optimizada para formato <strong className="text-emerald-400">OGG (Vorbis / Opus)</strong>, MP3 y AAC.
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
+                    Soporte OGG Nativo Activo
+                  </span>
                 </div>
-                <input
-                  type="url"
-                  required
-                  value={streamUrl}
-                  onChange={(e) => {
-                    setStreamUrl(e.target.value);
-                    setStreamTestResult(null);
-                  }}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#121013] border border-stone-700 text-[#FAF7F2] text-sm font-mono focus:outline-none focus:border-[#D4AF37]"
-                  placeholder="https://servidor.radio.com:8000/stream"
-                />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-stone-400 font-medium mb-1.5">
+                      Formato Principal
+                    </label>
+                    <select
+                      value={streamFormat}
+                      onChange={(e) => setStreamFormat(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#161217] border border-stone-700 text-[#FAF7F2] text-sm focus:outline-none focus:border-[#D4AF37]"
+                    >
+                      <option value="ogg">OGG Vorbis / Opus (Recomendado)</option>
+                      <option value="auto">Auto (Detección Inteligente)</option>
+                      <option value="mp3">MP3 (MPEG Audio)</option>
+                      <option value="aac">AAC (Advanced Audio Coding)</option>
+                    </select>
+                    <p className="text-[11px] text-stone-500 mt-1">El reproductor aplicará los decodificadores óptimos.</p>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs uppercase tracking-wider text-stone-400 font-medium">
+                        URL del Streaming Principal (Icecast / Shoutcast / Zeno)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleTestStream}
+                        disabled={isTestingStream || !streamUrl}
+                        className="text-xs text-[#D4AF37] hover:underline inline-flex items-center gap-1 font-medium disabled:opacity-50"
+                      >
+                        <Activity className="w-3.5 h-3.5" />
+                        <span>{isTestingStream ? 'Probando...' : 'Probar señal OGG'}</span>
+                      </button>
+                    </div>
+                    <input
+                      type="url"
+                      required
+                      value={streamUrl}
+                      onChange={(e) => {
+                        setStreamUrl(e.target.value);
+                        setStreamTestResult(null);
+                      }}
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#161217] border border-stone-700 text-[#FAF7F2] text-sm font-mono focus:outline-none focus:border-[#D4AF37]"
+                      placeholder="https://servidor.radio.com:8000/stream.ogg"
+                    />
+                    <p className="text-[11px] text-stone-500 mt-1">
+                      Admite transmisiones OGG (.ogg, /live.ogg), Zeno, AzuraCast, etc.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Optional Fallback Stream URL for legacy Apple Safari / iOS devices without Vorbis */}
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-stone-400 font-medium mb-1.5">
+                    URL de Respaldo / Fallback (Opcional - MP3 o AAC)
+                  </label>
+                  <input
+                    type="url"
+                    value={streamUrlFallback}
+                    onChange={(e) => setStreamUrlFallback(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#161217] border border-stone-700 text-[#FAF7F2] text-sm font-mono focus:outline-none focus:border-[#D4AF37]"
+                    placeholder="https://servidor.radio.com:8000/stream.mp3"
+                  />
+                  <p className="text-[11px] text-stone-500 mt-1">
+                    Garantiza reproducción al 100% en dispositivos y navegadores antiguos de Apple (iOS &lt; 18.4) si tu señal principal es OGG Vorbis.
+                  </p>
+                </div>
 
                 {streamTestResult && (
-                  <div className={`mt-2 p-3 rounded-xl text-xs flex items-center justify-between ${
+                  <div className={`p-3 rounded-xl text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 ${
                     streamTestResult.valid
                       ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-200'
                       : 'bg-rose-950/60 border border-rose-500/40 text-rose-200'
                   }`}>
-                    <span>
+                    <span className="font-medium">
                       {streamTestResult.valid
-                        ? `✓ Transmisión activa recibida (${streamTestResult.contentType || 'Audio'})`
+                        ? `✓ Transmisión activa recibida (${streamTestResult.detectedFormat || streamTestResult.contentType || 'Audio'})`
                         : `✗ Señal no verificada: ${streamTestResult.error || 'Respuesta inválida'}`}
                     </span>
+                    {streamTestResult.valid && (
+                      <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-900/60 text-emerald-300 font-mono">
+                        Estado HTTP: {streamTestResult.status || 200} OK
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

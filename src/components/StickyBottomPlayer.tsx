@@ -63,9 +63,14 @@ export const StickyBottomPlayer: React.FC<StickyBottomPlayerProps> = ({
                   <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-red-500 animate-pulse' : 'bg-stone-500'}`} />
                   {isPlaying ? 'EN VIVO' : 'PAUSADO'}
                 </span>
+                {(config.stream_format === 'ogg' || (config.stream_url && config.stream_url.toLowerCase().includes('ogg'))) && (
+                  <span className="px-1 py-0.2 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono font-semibold hidden sm:inline-block">
+                    OGG
+                  </span>
+                )}
               </div>
               <p className="text-xs text-[#FAF7F2]/60 truncate hidden xs:block">
-                {config.slogan || 'El Canto de Nuestra Tierra'} · 24 Horas
+                {config.slogan || 'Programa de música y cultura del py con Rubén Sosa'} · 24 Horas
               </p>
             </div>
           </div>
