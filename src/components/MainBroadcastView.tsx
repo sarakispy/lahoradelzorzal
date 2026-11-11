@@ -29,7 +29,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
   const isLoading = status === 'loading';
   const isError = status === 'error';
 
-  const rawNumber = config.whatsapp_number || '595985160699';
+  const rawNumber = config.whatsapp_number || '595981123456';
   const cleanNumber = rawNumber.replace(/[^0-9]/g, '');
   const message = config.whatsapp_message || '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.';
   const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
@@ -79,7 +79,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
 
             <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#D4AF37]/80 uppercase tracking-widest font-medium">
               <Radio className="w-3.5 h-3.5" />
-              <span>Transmisión 24/7</span>
+              <span>Transmisión Digital 24/7</span>
             </div>
           </div>
 
@@ -92,7 +92,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
               {config.station_name || 'LA HORA DEL ZORZAL'}
             </h1>
             <p className="text-xs sm:text-sm text-[#FAF7F2]/75 font-normal">
-              Música paraguaya las 24 horas · Polcas y guaranias
+              Música paraguaya las 24 horas · Polcas, guaranias y folclore
             </p>
           </div>
 
@@ -291,7 +291,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
           {/* Paraguayan Folk Culture Highlights */}
           <div className="pt-3 border-t border-[#D4AF37]/15 flex items-center justify-center gap-2 text-[11px] text-[#D4AF37]">
             <Music className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Polcas · Guaranias</span>
+            <span className="truncate">Polcas · Guaranias · Folclore Paraguayo</span>
           </div>
 
         </div>

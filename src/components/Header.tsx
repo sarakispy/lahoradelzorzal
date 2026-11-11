@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ isPlaying }) => {
               LA HORA DEL ZORZAL
             </span>
             <span className="text-[9px] sm:text-xs tracking-[0.2em] uppercase text-[#D4AF37] font-medium whitespace-nowrap">
-              Música Paraguaya 24/7
+              El Canto de Nuestra Tierra
             </span>
           </div>
         </div>

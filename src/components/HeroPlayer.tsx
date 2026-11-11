@@ -84,7 +84,7 @@ export const HeroPlayer: React.FC<HeroPlayerProps> = ({
             {config.station_name || 'LA HORA DEL ZORZAL'}
           </h1>
           <p className="text-sm md:text-base text-[#FAF7F2]/80 font-normal">
-            Música paraguaya las 24 horas · Polcas y guaranias
+            Música paraguaya las 24 horas · Polcas, guaranias y folclore
           </p>
         </div>
 
