@@ -13,6 +13,8 @@ const DEFAULT_CONFIG: RadioConfig = {
   whatsapp_message: '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.',
   player_title: 'SEÑAL EN DIRECTO',
   player_subtitle: '24 hs con lo mejor del folklore paraguayo',
+  stream_format: 'ogg',
+  stream_url_fallback: '',
 };
 
 export default function App() {
@@ -90,6 +92,25 @@ export default function App() {
     fetchConfig();
   }, [fetchConfig]);
 
+  // Helper to build playable stream URL respecting OGG mountpoints and HTTPS Mixed Content
+  const getPlayableStreamUrl = useCallback((targetUrl: string) => {
+    let finalUrl = targetUrl.trim();
+    
+    // Icecast servers often error 404 when query params (?_t=...) are appended to mountpoints ending in .ogg
+    // For .ogg URLs, keep the clean mountpoint URL; otherwise add a cache-buster
+    if (!finalUrl.toLowerCase().includes('.ogg')) {
+      const separator = finalUrl.includes('?') ? '&' : '?';
+      finalUrl = `${finalUrl}${separator}_t=${Date.now()}`;
+    }
+
+    // Solve Mixed Content: If web page is HTTPS and audio URL is insecure HTTP, route through audio proxy
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && finalUrl.startsWith('http://')) {
+      return `/api/stream/proxy?url=${encodeURIComponent(finalUrl)}`;
+    }
+
+    return finalUrl;
+  }, []);
+
   // Audio instance initialization and event binding
   useEffect(() => {
     const audio = new Audio();
@@ -113,8 +134,30 @@ export default function App() {
 
     const onError = () => {
       console.error('Error en el stream de audio:', audio.error);
+      
+      const isOgg = config.stream_format === 'ogg' || (config.stream_url && config.stream_url.toLowerCase().includes('ogg'));
+      const canPlayOgg = audio.canPlayType('audio/ogg; codecs="vorbis"') || 
+                         audio.canPlayType('audio/ogg; codecs="opus"') || 
+                         audio.canPlayType('audio/ogg');
+
+      // Check if fallback URL is available
+      if (config.stream_url_fallback && audio.src !== config.stream_url_fallback) {
+        console.log('[Audio] Transmisión primaria falló. Intentando señal de respaldo...');
+        audio.src = getPlayableStreamUrl(config.stream_url_fallback);
+        audio.load();
+        audio.play().catch(() => {
+          setStatus('error');
+          setErrorMessage('No se pudo conectar a la transmisión principal ni a la de respaldo.');
+        });
+        return;
+      }
+
       setStatus('error');
-      setErrorMessage('La transmisión no está disponible o hubo un corte de señal.');
+      if (isOgg && !canPlayOgg) {
+        setErrorMessage('La transmisión se emite en formato OGG. Tu navegador no soporta OGG Vorbis de forma nativa; prueba en Chrome o Firefox.');
+      } else {
+        setErrorMessage('La transmisión no está disponible o hubo un corte de señal momentáneo.');
+      }
     };
 
     audio.addEventListener('playing', onPlaying);
@@ -132,7 +175,7 @@ export default function App() {
       audio.pause();
       audio.src = '';
     };
-  }, []);
+  }, [config, isMuted, volume, getPlayableStreamUrl, status]);
 
   // Update audio volume when state changes
   useEffect(() => {
@@ -142,7 +185,7 @@ export default function App() {
     localStorage.setItem('zorzal_radio_volume', volume.toString());
   }, [volume, isMuted]);
 
-  // Audio Play/Pause Toggle
+  // Audio Play/Pause Toggle with OGG stream support
   const togglePlay = () => {
     if (!audioRef.current) return;
 
@@ -153,20 +196,42 @@ export default function App() {
       setStatus('loading');
       setErrorMessage(null);
 
-      // Append clean live query parameter to prevent stale cache on reconnect
-      const baseStream = config.stream_url;
-      const separator = baseStream.includes('?') ? '&' : '?';
-      const liveStreamUrl = `${baseStream}${separator}_t=${Date.now()}`;
+      const isOgg = config.stream_format === 'ogg' || (config.stream_url && config.stream_url.toLowerCase().includes('ogg'));
+      const canPlayOgg = audioRef.current.canPlayType('audio/ogg; codecs="vorbis"') || 
+                         audioRef.current.canPlayType('audio/ogg; codecs="opus"') || 
+                         audioRef.current.canPlayType('audio/ogg');
 
-      audioRef.current.src = liveStreamUrl;
+      // If browser strictly cannot play Ogg and fallback stream is available, use fallback
+      let urlToLoad = config.stream_url;
+      if (isOgg && !canPlayOgg && config.stream_url_fallback) {
+        urlToLoad = config.stream_url_fallback;
+      }
+
+      const streamToPlay = getPlayableStreamUrl(urlToLoad);
+      audioRef.current.src = streamToPlay;
       audioRef.current.load();
 
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
-          console.warn('Playback error or blocked by browser policy:', err);
+          console.warn('Playback error or policy blocked:', err);
+          // If clean OGG mountpoint had parameters or proxy, retry with clean URL
+          if (urlToLoad.includes('.ogg') && streamToPlay !== urlToLoad && audioRef.current) {
+            audioRef.current.src = urlToLoad;
+            audioRef.current.load();
+            audioRef.current.play().catch(() => {
+              setStatus('error');
+              setErrorMessage('No se pudo conectar a la transmisión OGG. Verifique su conexión.');
+            });
+            return;
+          }
+
           setStatus('error');
-          setErrorMessage('No se pudo conectar a la transmisión. Verifique su conexión a internet.');
+          if (isOgg && !canPlayOgg) {
+            setErrorMessage('La transmisión se emite en formato OGG. Se requiere un navegador compatible como Chrome o Safari actualizado.');
+          } else {
+            setErrorMessage('No se pudo conectar a la transmisión. Verifique su conexión a internet.');
+          }
         });
       }
     }
@@ -192,8 +257,8 @@ export default function App() {
     // If stream URL changed, reload player if playing
     if (audioRef.current && status === 'playing' && newConfig.stream_url !== config.stream_url) {
       audioRef.current.pause();
-      const separator = newConfig.stream_url.includes('?') ? '&' : '?';
-      audioRef.current.src = `${newConfig.stream_url}${separator}_t=${Date.now()}`;
+      const playable = getPlayableStreamUrl(newConfig.stream_url);
+      audioRef.current.src = playable;
       audioRef.current.load();
       audioRef.current.play().catch(() => {});
     }
