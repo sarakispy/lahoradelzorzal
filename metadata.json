@@ -1,0 +1,8 @@
+{
+  "name": "La Hora del Zorzal - Radio Online",
+  "description": "Radio online de música paraguaya tradicional las 24 horas: polcas, guaranias y folclore. El Canto de Nuestra Tierra.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
