@@ -29,7 +29,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
   const isLoading = status === 'loading';
   const isError = status === 'error';
 
-  const rawNumber = config.whatsapp_number || '595981123456';
+  const rawNumber = config.whatsapp_number || '+595985160699';
   const cleanNumber = rawNumber.replace(/[^0-9]/g, '');
   const message = config.whatsapp_message || '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.';
   const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
@@ -79,20 +79,20 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
 
             <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#D4AF37]/80 uppercase tracking-widest font-medium">
               <Radio className="w-3.5 h-3.5" />
-              <span>Transmisión Digital 24/7</span>
+              <span>Transmisión 24/7</span>
             </div>
           </div>
 
           {/* Emisora Identity */}
           <div className="my-3 text-center sm:text-left space-y-1">
             <p className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] uppercase text-[#D4AF37]">
-              {config.slogan || 'EL CANTO DE NUESTRA TIERRA'}
+              {config.slogan || '24 hs con lo mejor del folklore paraguayo'}
             </p>
             <h1 className="font-serif-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#FAF7F2] drop-shadow-md leading-tight">
               {config.station_name || 'LA HORA DEL ZORZAL'}
             </h1>
             <p className="text-xs sm:text-sm text-[#FAF7F2]/75 font-normal">
-              Música paraguaya las 24 horas · Polcas, guaranias y folclore
+              Programa de música y cultura del py con Rubén Sosa
             </p>
           </div>
 
@@ -291,7 +291,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
           {/* Paraguayan Folk Culture Highlights */}
           <div className="pt-3 border-t border-[#D4AF37]/15 flex items-center justify-center gap-2 text-[11px] text-[#D4AF37]">
             <Music className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Polcas · Guaranias · Folclore Paraguayo</span>
+            <span className="truncate">Polcas · Guaranias</span>
           </div>
 
         </div>
