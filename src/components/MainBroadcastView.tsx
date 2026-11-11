@@ -29,10 +29,13 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
   const isLoading = status === 'loading';
   const isError = status === 'error';
 
-  const rawNumber = config.whatsapp_number || '+595985160699';
+  const rawNumber = config.whatsapp_number || '595985160699';
   const cleanNumber = rawNumber.replace(/[^0-9]/g, '');
   const message = config.whatsapp_message || '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.';
   const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
+
+  const playerTitle = config.player_title || 'SEÑAL EN DIRECTO';
+  const playerSubtitle = config.player_subtitle || '24 hs con lo mejor del folklore paraguayo';
 
   return (
     <div className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 md:py-8 flex-1 flex flex-col justify-center">
@@ -42,7 +45,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
           {[...Array(14)].map((_, i) => (
             <div
               key={i}
-              className="w-[1px] h-full bg-gradient-to-b from-transparent via-[#D4AF37]/30 to-transparent"
+              className="w-[1px] h-full bg-gradient-to-b from-transparent via-[var(--color-dorado,#D4AF37)]/30 to-transparent"
               style={{
                 opacity: 0.15 + (i % 2) * 0.15,
                 transform: `rotate(${(i - 7) * 0.6}deg)`,
@@ -53,7 +56,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
       </div>
 
       {/* Radial Burgundy Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] md:w-[700px] h-[400px] rounded-full bg-gradient-to-br from-[#6B1422]/20 via-[#4A0E17]/15 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] md:w-[700px] h-[400px] rounded-full bg-gradient-to-br from-[var(--color-bordo,#4A0E17)]/25 via-[var(--color-bordo,#4A0E17)]/15 to-transparent blur-3xl pointer-events-none" />
 
       {/* Side-by-side 2-column Grid Layout (No-scroll on desktop) */}
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 md:gap-6 items-stretch">
@@ -61,38 +64,38 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
         {/* ========================================================
             COLUMN 1: EL REPRODUCTOR PRINCIPAL (7 cols on Desktop)
            ======================================================== */}
-        <div className="lg:col-span-7 bg-gradient-to-b from-[#1C181E]/95 via-[#161217]/95 to-[#121013]/98 rounded-3xl border border-[#D4AF37]/30 shadow-[0_15px_40px_rgba(0,0,0,0.5)] p-5 sm:p-7 md:p-8 flex flex-col justify-between backdrop-blur-xl">
+        <div className="lg:col-span-7 bg-gradient-to-b from-[#1C181E]/95 via-[#161217]/95 to-[#121013]/98 rounded-3xl border border-[var(--color-dorado,#D4AF37)]/30 shadow-[0_15px_40px_rgba(0,0,0,0.5)] p-5 sm:p-7 md:p-8 flex flex-col justify-between backdrop-blur-xl">
           
           {/* Top Status & Badge */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#D4AF37]/15">
+          <div className="flex items-center justify-between pb-3 border-b border-[var(--color-dorado,#D4AF37)]/15">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
                 {isPlaying && (
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                 )}
-                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isPlaying ? 'bg-red-500' : isLoading ? 'bg-[#D4AF37]' : 'bg-stone-500'}`} />
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isPlaying ? 'bg-red-500' : isLoading ? 'bg-[var(--color-dorado,#D4AF37)]' : 'bg-stone-500'}`} />
               </span>
               <span className="text-[11px] uppercase tracking-widest font-semibold text-[#FAF7F2]">
                 {isLoading ? 'Conectando...' : isPlaying ? 'EN VIVO' : 'SEÑAL LISTA'}
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#D4AF37]/80 uppercase tracking-widest font-medium">
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[var(--color-dorado,#D4AF37)]/80 uppercase tracking-widest font-medium">
               <Radio className="w-3.5 h-3.5" />
-              <span>Transmisión 24/7</span>
+              <span>Transmisión Digital 24/7</span>
             </div>
           </div>
 
-          {/* Emisora Identity */}
+          {/* Clean Non-Redundant Broadcast Content */}
           <div className="my-3 text-center sm:text-left space-y-1">
-            <p className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] uppercase text-[#D4AF37]">
-              {config.slogan || '24 hs con lo mejor del folklore paraguayo'}
+            <p className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] uppercase text-[var(--color-dorado,#D4AF37)]">
+              {config.slogan || 'Programa de música y cultura del py con Rubén Sosa'}
             </p>
             <h1 className="font-serif-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#FAF7F2] drop-shadow-md leading-tight">
-              {config.station_name || 'LA HORA DEL ZORZAL'}
+              {playerTitle}
             </h1>
             <p className="text-xs sm:text-sm text-[#FAF7F2]/75 font-normal">
-              Programa de música y cultura del py con Rubén Sosa
+              {playerSubtitle}
             </p>
           </div>
 
@@ -118,9 +121,9 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
                 key={idx}
                 className={`w-1 sm:w-1.5 rounded-full transition-all duration-300 ${
                   isPlaying
-                    ? `bg-gradient-to-t from-[#D4AF37] via-[#F3E5AB] to-[#D4AF37] ${animClass} h-8`
+                    ? `bg-gradient-to-t from-[var(--color-dorado,#D4AF37)] via-[#F3E5AB] to-[var(--color-dorado,#D4AF37)] ${animClass} h-8`
                     : isLoading
-                    ? 'bg-[#D4AF37]/40 h-2.5 animate-pulse'
+                    ? 'bg-[var(--color-dorado,#D4AF37)]/40 h-2.5 animate-pulse'
                     : 'bg-stone-700/80 h-1.5'
                 }`}
               />
@@ -131,23 +134,23 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
           <div className="flex flex-col items-center justify-center my-2">
             <div className="relative group">
               {isPlaying && (
-                <div className="absolute -inset-2 rounded-full bg-[#D4AF37]/25 blur-lg animate-pulse pointer-events-none" />
+                <div className="absolute -inset-2 rounded-full bg-[var(--color-dorado,#D4AF37)]/25 blur-lg animate-pulse pointer-events-none" />
               )}
 
               <button
                 onClick={onTogglePlay}
                 disabled={isLoading}
                 aria-label={isPlaying ? 'Pausar transmisión de La Hora del Zorzal' : 'Reproducir transmisión de La Hora del Zorzal'}
-                className={`relative flex items-center justify-center w-20 h-20 sm:w-22 sm:h-22 rounded-full border-2 transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.5)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#D4AF37] ${
+                className={`relative flex items-center justify-center w-20 h-20 sm:w-22 sm:h-22 rounded-full border-2 transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.5)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-dorado,#D4AF37)] ${
                   isLoading
-                    ? 'border-[#D4AF37]/40 bg-[#4A0E17]/60 cursor-wait'
+                    ? 'border-[var(--color-dorado,#D4AF37)]/40 bg-[var(--color-bordo,#4A0E17)]/60 cursor-wait'
                     : isPlaying
-                    ? 'border-[#D4AF37] bg-gradient-to-br from-[#4A0E17] via-[#6B1422] to-[#2D080E] text-[#FAF7F2] hover:scale-105 hover:shadow-[0_0_25px_rgba(212,175,55,0.4)]'
-                    : 'border-[#D4AF37] bg-gradient-to-br from-[#4A0E17] to-[#121013] text-[#D4AF37] hover:text-[#FAF7F2] hover:scale-105 hover:border-[#F3E5AB] hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]'
+                    ? 'border-[var(--color-dorado,#D4AF37)] bg-gradient-to-br from-[var(--color-bordo,#4A0E17)] via-[#6B1422] to-[#2D080E] text-[#FAF7F2] hover:scale-105 hover:shadow-[0_0_25px_rgba(212,175,55,0.4)]'
+                    : 'border-[var(--color-dorado,#D4AF37)] bg-gradient-to-br from-[var(--color-bordo,#4A0E17)] to-[#121013] text-[var(--color-dorado,#D4AF37)] hover:text-[#FAF7F2] hover:scale-105 hover:border-[#F3E5AB] hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]'
                 }`}
               >
                 {isLoading ? (
-                  <RefreshCw className="w-8 h-8 animate-spin text-[#D4AF37]" />
+                  <RefreshCw className="w-8 h-8 animate-spin text-[var(--color-dorado,#D4AF37)]" />
                 ) : isPlaying ? (
                   <Pause className="w-8 h-8 sm:w-9 sm:h-9 fill-current" />
                 ) : (
@@ -159,7 +162,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
             {/* Connection Status Text */}
             <div className="mt-3 min-h-[24px] flex items-center justify-center text-center">
               {isLoading && (
-                <p className="text-xs text-[#D4AF37] animate-pulse font-medium">
+                <p className="text-xs text-[var(--color-dorado,#D4AF37)] animate-pulse font-medium">
                   Conectando con la transmisión en vivo...
                 </p>
               )}
@@ -195,11 +198,11 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
           </div>
 
           {/* Volume Control Bar */}
-          <div className="pt-3 border-t border-[#D4AF37]/15 flex items-center justify-center gap-3 max-w-xs mx-auto w-full">
+          <div className="pt-3 border-t border-[var(--color-dorado,#D4AF37)]/15 flex items-center justify-center gap-3 max-w-xs mx-auto w-full">
             <button
               onClick={onToggleMute}
               aria-label={isMuted ? 'Activar sonido' : 'Silenciar sonido'}
-              className="text-[#FAF7F2]/70 hover:text-[#D4AF37] transition-colors p-1 rounded focus:outline-none"
+              className="text-[#FAF7F2]/70 hover:text-[var(--color-dorado,#D4AF37)] transition-colors p-1 rounded focus:outline-none"
             >
               {isMuted || volume === 0 ? (
                 <VolumeX className="w-4 h-4 text-rose-400" />
@@ -219,7 +222,7 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
                 value={isMuted ? 0 : volume}
                 onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
                 aria-label="Control de volumen"
-                className="w-full h-1.5 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
+                className="w-full h-1.5 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-[var(--color-dorado,#D4AF37)]"
               />
               <span className="text-[11px] font-mono tabular-nums text-[#FAF7F2]/60 w-8 text-right">
                 {isMuted ? '0%' : `${Math.round(volume * 100)}%`}
@@ -232,11 +235,11 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
         {/* ========================================================
             COLUMN 2: CONTACTO POR WHATSAPP & INFO (5 cols on Desktop)
            ======================================================== */}
-        <div className="lg:col-span-5 bg-gradient-to-b from-[#1C181E]/95 via-[#18131A]/95 to-[#121013]/98 rounded-3xl border border-[#D4AF37]/30 shadow-[0_15px_40px_rgba(0,0,0,0.5)] p-5 sm:p-7 md:p-8 flex flex-col justify-between backdrop-blur-xl text-center">
+        <div className="lg:col-span-5 bg-gradient-to-b from-[#1C181E]/95 via-[#18131A]/95 to-[#121013]/98 rounded-3xl border border-[var(--color-dorado,#D4AF37)]/30 shadow-[0_15px_40px_rgba(0,0,0,0.5)] p-5 sm:p-7 md:p-8 flex flex-col justify-between backdrop-blur-xl text-center">
           
           {/* Top Divider with Paraguayan note */}
-          <div className="pb-3 border-b border-[#D4AF37]/15 flex items-center justify-between text-left">
-            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-[#D4AF37] font-semibold">
+          <div className="pb-3 border-b border-[var(--color-dorado,#D4AF37)]/15 flex items-center justify-between text-left">
+            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-[var(--color-dorado,#D4AF37)] font-semibold">
               <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
               <span>Línea de Oyentes</span>
             </div>
@@ -289,9 +292,9 @@ export const MainBroadcastView: React.FC<MainBroadcastViewProps> = ({
           </div>
 
           {/* Paraguayan Folk Culture Highlights */}
-          <div className="pt-3 border-t border-[#D4AF37]/15 flex items-center justify-center gap-2 text-[11px] text-[#D4AF37]">
+          <div className="pt-3 border-t border-[var(--color-dorado,#D4AF37)]/15 flex items-center justify-center gap-2 text-[11px] text-[var(--color-dorado,#D4AF37)]">
             <Music className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Polcas · Guaranias</span>
+            <span className="truncate">24 hs con lo mejor del folklore paraguayo</span>
           </div>
 
         </div>
