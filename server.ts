@@ -266,6 +266,11 @@ async function startServer() {
   });
 }
 
-startServer().catch((err) => {
-  console.error('[Server] Fatal startup error:', err);
-});
+// Only launch standalone server listener when not running as a Vercel serverless function
+if (process.env.VERCEL !== '1') {
+  startServer().catch((err) => {
+    console.error('[Server] Fatal startup error:', err);
+  });
+}
+
+export default app;
