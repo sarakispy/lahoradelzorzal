@@ -9,7 +9,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ config }) => {
   const currentYear = new Date().getFullYear();
-  const rawNumber = config.whatsapp_number || '595981123456';
+  const rawNumber = config.whatsapp_number || '+595985160699';
   const cleanNumber = rawNumber.replace(/[^0-9]/g, '');
   const message = config.whatsapp_message || '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.';
   const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
