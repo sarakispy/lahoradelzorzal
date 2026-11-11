@@ -9,7 +9,7 @@ const DEFAULT_CONFIG: RadioConfig = {
   station_name: 'LA HORA DEL ZORZAL',
   slogan: 'EL CANTO DE NUESTRA TIERRA',
   stream_url: 'https://stream.zeno.fm/fvrx452718quv',
-  whatsapp_number: '+595985160699',
+  whatsapp_number: '595981123456',
   whatsapp_message: '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.',
 };
 
@@ -57,14 +57,30 @@ export default function App() {
   const fetchConfig = useCallback(async () => {
     try {
       const res = await fetch('/api/config');
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.station_name) {
-          setConfig(data);
+      const text = await res.text();
+      if (text && text.trim()) {
+        try {
+          const data = JSON.parse(text);
+          if (data && data.station_name) {
+            setConfig(data);
+            return;
+          }
+        } catch {
+          // not valid JSON, fallback to local
         }
       }
     } catch (err) {
       console.warn('Usando configuración local de La Hora del Zorzal:', err);
+    }
+
+    const saved = localStorage.getItem('zorzal_radio_config');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.station_name) {
+          setConfig(parsed);
+        }
+      } catch (e) {}
     }
   }, []);
 
