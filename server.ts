@@ -133,7 +133,20 @@ app.get('/api/auth/verify', requireAdminAuth, (req: AuthenticatedRequest, res: R
 // Update radio configuration
 app.put('/api/admin/config', requireAdminAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { station_name, slogan, stream_url, whatsapp_number, whatsapp_message } = req.body;
+    const {
+      station_name,
+      slogan,
+      stream_url,
+      whatsapp_number,
+      whatsapp_message,
+      background_url,
+      background_opacity,
+      logo_url,
+      color_primary,
+      color_accent,
+      player_title,
+      player_subtitle,
+    } = req.body;
 
     if (!station_name || !stream_url) {
       return res.status(400).json({ error: 'El nombre de la emisora y la URL del streaming son requeridos.' });
@@ -144,10 +157,17 @@ app.put('/api/admin/config', requireAdminAuth, async (req: AuthenticatedRequest,
 
     const updated = await updateRadioConfig({
       station_name: station_name.trim(),
-      slogan: slogan ? slogan.trim() : '',
+      slogan: slogan !== undefined ? slogan.trim() : undefined,
       stream_url: stream_url.trim(),
       whatsapp_number: cleanedWhatsapp,
-      whatsapp_message: whatsapp_message ? whatsapp_message.trim() : '',
+      whatsapp_message: whatsapp_message !== undefined ? whatsapp_message.trim() : undefined,
+      background_url: background_url !== undefined ? background_url.trim() : undefined,
+      background_opacity: background_opacity !== undefined ? Number(background_opacity) : undefined,
+      logo_url: logo_url !== undefined ? logo_url.trim() : undefined,
+      color_primary: color_primary !== undefined ? color_primary.trim() : undefined,
+      color_accent: color_accent !== undefined ? color_accent.trim() : undefined,
+      player_title: player_title !== undefined ? player_title.trim() : undefined,
+      player_subtitle: player_subtitle !== undefined ? player_subtitle.trim() : undefined,
     });
 
     res.json({

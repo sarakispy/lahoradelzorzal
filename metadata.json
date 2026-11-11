@@ -1,6 +1,6 @@
 {
   "name": "La Hora del Zorzal - Radio Online",
-  "description": "Radio online de música paraguaya tradicional las 24 horas: polcas, guaranias y folclore. El Canto de Nuestra Tierra.",
+  "description": "Radio online de música y cultura del Paraguay con Rubén Sosa. 24 hs con lo mejor del folklore paraguayo.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
