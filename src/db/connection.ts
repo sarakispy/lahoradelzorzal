@@ -4,12 +4,19 @@ import bcrypt from 'bcryptjs';
 const { Pool } = pg;
 
 export interface RadioConfig {
-  id: number;
+  id?: number;
   station_name: string;
   slogan: string;
   stream_url: string;
   whatsapp_number: string;
   whatsapp_message: string;
+  background_url?: string;
+  background_opacity?: number;
+  logo_url?: string;
+  color_primary?: string;
+  color_accent?: string;
+  player_title?: string;
+  player_subtitle?: string;
   updated_at?: string;
 }
 
@@ -21,23 +28,28 @@ export interface AdminUser {
   updated_at?: string;
 }
 
-// Fallback in-memory database for local sandbox when PostgreSQL server is not running
+// Fallback in-memory database for local sandbox or when PostgreSQL server is not running
 class FallbackDatabase {
   private config: RadioConfig = {
     id: 1,
     station_name: 'LA HORA DEL ZORZAL',
-    slogan: 'EL CANTO DE NUESTRA TIERRA',
-    // Live high-stability stream for traditional folk / radio
+    slogan: 'Programa de música y cultura del py con Rubén Sosa',
     stream_url: 'https://stream.zeno.fm/fvrx452718quv',
-    whatsapp_number: '595981123456',
+    whatsapp_number: '595985160699',
     whatsapp_message: '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.',
+    background_url: '/fondo_arpa_zorzal.jpg',
+    background_opacity: 25,
+    logo_url: '',
+    color_primary: '#4A0E17',
+    color_accent: '#D4AF37',
+    player_title: 'SEÑAL EN DIRECTO',
+    player_subtitle: '24 hs con lo mejor del folklore paraguayo',
     updated_at: new Date().toISOString(),
   };
 
   private users: AdminUser[] = [];
 
   constructor() {
-    // Seed default admin: username: 'admin', password: 'zorzaladmin2024'
     const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'zorzaladmin2024';
     const defaultUsername = process.env.ADMIN_DEFAULT_USER || 'admin';
     const hash = bcrypt.hashSync(defaultPassword, 10);
@@ -115,22 +127,67 @@ export async function initDatabase(): Promise<{ isPostgres: boolean }> {
       CREATE TABLE IF NOT EXISTS radio_config (
         id SERIAL PRIMARY KEY,
         station_name VARCHAR(150) NOT NULL DEFAULT 'LA HORA DEL ZORZAL',
-        slogan VARCHAR(255) NOT NULL DEFAULT 'EL CANTO DE NUESTRA TIERRA',
+        slogan VARCHAR(255) NOT NULL DEFAULT 'Programa de música y cultura del py con Rubén Sosa',
         stream_url TEXT NOT NULL DEFAULT 'https://stream.zeno.fm/fvrx452718quv',
-        whatsapp_number VARCHAR(50) NOT NULL DEFAULT '595981123456',
+        whatsapp_number VARCHAR(50) NOT NULL DEFAULT '595985160699',
         whatsapp_message TEXT NOT NULL DEFAULT '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.',
+        background_url TEXT DEFAULT '/fondo_arpa_zorzal.jpg',
+        background_opacity NUMERIC DEFAULT 25,
+        logo_url TEXT DEFAULT '',
+        color_primary VARCHAR(25) DEFAULT '#4A0E17',
+        color_accent VARCHAR(25) DEFAULT '#D4AF37',
+        player_title VARCHAR(150) DEFAULT 'SEÑAL EN DIRECTO',
+        player_subtitle VARCHAR(255) DEFAULT '24 hs con lo mejor del folklore paraguayo',
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    // Ensure columns exist if table was already created in an earlier migration
+    const alterQueries = [
+      `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS background_url TEXT DEFAULT '/fondo_arpa_zorzal.jpg'`,
+      `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS background_opacity NUMERIC DEFAULT 25`,
+      `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS logo_url TEXT DEFAULT ''`,
+      `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS color_primary VARCHAR(25) DEFAULT '#4A0E17'`,
+      `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS color_accent VARCHAR(25) DEFAULT '#D4AF37'`,
+      `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS player_title VARCHAR(150) DEFAULT 'SEÑAL EN DIRECTO'`,
+      `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS player_subtitle VARCHAR(255) DEFAULT '24 hs con lo mejor del folklore paraguayo'`,
+    ];
+
+    for (const q of alterQueries) {
+      try {
+        await client.query(q);
+      } catch (err) {
+        // ignore if exists
+      }
+    }
 
     // Ensure initial radio config exists
     const configRes = await client.query('SELECT * FROM radio_config WHERE id = 1');
     if (configRes.rowCount === 0) {
       await client.query(`
-        INSERT INTO radio_config (id, station_name, slogan, stream_url, whatsapp_number, whatsapp_message)
-        VALUES (1, 'LA HORA DEL ZORZAL', 'EL CANTO DE NUESTRA TIERRA', 'https://stream.zeno.fm/fvrx452718quv', '595981123456', '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.')
+        INSERT INTO radio_config (
+          id, station_name, slogan, stream_url, whatsapp_number, whatsapp_message,
+          background_url, background_opacity, logo_url, color_primary, color_accent,
+          player_title, player_subtitle
+        )
+        VALUES (
+          1, 'LA HORA DEL ZORZAL', 'Programa de música y cultura del py con Rubén Sosa',
+          'https://stream.zeno.fm/fvrx452718quv', '595985160699',
+          '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.',
+          '/fondo_arpa_zorzal.jpg', 25, '', '#4A0E17', '#D4AF37',
+          'SEÑAL EN DIRECTO', '24 hs con lo mejor del folklore paraguayo'
+        )
       `);
       console.log('[Database] Default radio configuration seeded into PostgreSQL.');
+    } else {
+      // Migrate legacy seed values if present
+      await client.query(`
+        UPDATE radio_config
+        SET slogan = 'Programa de música y cultura del py con Rubén Sosa',
+            player_subtitle = '24 hs con lo mejor del folklore paraguayo',
+            whatsapp_number = '595985160699'
+        WHERE id = 1 AND (slogan = 'EL CANTO DE NUESTRA TIERRA' OR whatsapp_number = '595981123456');
+      `);
     }
 
     // Ensure default admin user exists
@@ -177,25 +234,26 @@ export async function updateRadioConfig(data: Partial<Omit<RadioConfig, 'id'>>):
       const values: any[] = [];
       let idx = 1;
 
-      if (data.station_name !== undefined) {
-        fields.push(`station_name = $${idx++}`);
-        values.push(data.station_name);
-      }
-      if (data.slogan !== undefined) {
-        fields.push(`slogan = $${idx++}`);
-        values.push(data.slogan);
-      }
-      if (data.stream_url !== undefined) {
-        fields.push(`stream_url = $${idx++}`);
-        values.push(data.stream_url);
-      }
-      if (data.whatsapp_number !== undefined) {
-        fields.push(`whatsapp_number = $${idx++}`);
-        values.push(data.whatsapp_number);
-      }
-      if (data.whatsapp_message !== undefined) {
-        fields.push(`whatsapp_message = $${idx++}`);
-        values.push(data.whatsapp_message);
+      const keys: (keyof Omit<RadioConfig, 'id'>)[] = [
+        'station_name',
+        'slogan',
+        'stream_url',
+        'whatsapp_number',
+        'whatsapp_message',
+        'background_url',
+        'background_opacity',
+        'logo_url',
+        'color_primary',
+        'color_accent',
+        'player_title',
+        'player_subtitle',
+      ];
+
+      for (const k of keys) {
+        if (data[k] !== undefined) {
+          fields.push(`${k} = $${idx++}`);
+          values.push(data[k]);
+        }
       }
 
       fields.push(`updated_at = CURRENT_TIMESTAMP`);
