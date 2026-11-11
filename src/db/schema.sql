@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS radio_config (
   color_accent VARCHAR(25) DEFAULT '#D4AF37',
   player_title VARCHAR(150) DEFAULT 'SEÑAL EN DIRECTO',
   player_subtitle VARCHAR(255) DEFAULT '24 hs con lo mejor del folklore paraguayo',
+  stream_format VARCHAR(20) DEFAULT 'ogg',
+  stream_url_fallback TEXT DEFAULT '',
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -29,11 +31,12 @@ CREATE TABLE IF NOT EXISTS radio_config (
 INSERT INTO radio_config (
   id, station_name, slogan, stream_url, whatsapp_number, whatsapp_message,
   background_url, background_opacity, logo_url, color_primary, color_accent,
-  player_title, player_subtitle
+  player_title, player_subtitle, stream_format, stream_url_fallback
 )
 SELECT 1, 'LA HORA DEL ZORZAL', 'Programa de música y cultura del py con Rubén Sosa',
        'https://stream.zeno.fm/fvrx452718quv', '595985160699',
        '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.',
        '/fondo_arpa_zorzal.jpg', 25, '', '#4A0E17', '#D4AF37',
-       'SEÑAL EN DIRECTO', '24 hs con lo mejor del folklore paraguayo'
+       'SEÑAL EN DIRECTO', '24 hs con lo mejor del folklore paraguayo',
+       'ogg', ''
 WHERE NOT EXISTS (SELECT 1 FROM radio_config WHERE id = 1);

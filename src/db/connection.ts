@@ -17,6 +17,8 @@ export interface RadioConfig {
   color_accent?: string;
   player_title?: string;
   player_subtitle?: string;
+  stream_format?: string;
+  stream_url_fallback?: string;
   updated_at?: string;
 }
 
@@ -44,6 +46,8 @@ class FallbackDatabase {
     color_accent: '#D4AF37',
     player_title: 'SEÑAL EN DIRECTO',
     player_subtitle: '24 hs con lo mejor del folklore paraguayo',
+    stream_format: 'ogg',
+    stream_url_fallback: '',
     updated_at: new Date().toISOString(),
   };
 
@@ -151,6 +155,8 @@ export async function initDatabase(): Promise<{ isPostgres: boolean }> {
       `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS color_accent VARCHAR(25) DEFAULT '#D4AF37'`,
       `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS player_title VARCHAR(150) DEFAULT 'SEÑAL EN DIRECTO'`,
       `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS player_subtitle VARCHAR(255) DEFAULT '24 hs con lo mejor del folklore paraguayo'`,
+      `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS stream_format VARCHAR(20) DEFAULT 'ogg'`,
+      `ALTER TABLE radio_config ADD COLUMN IF NOT EXISTS stream_url_fallback TEXT DEFAULT ''`,
     ];
 
     for (const q of alterQueries) {
