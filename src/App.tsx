@@ -7,10 +7,12 @@ import { RadioConfig, PlaybackStatus } from './types.ts';
 
 const DEFAULT_CONFIG: RadioConfig = {
   station_name: 'LA HORA DEL ZORZAL',
-  slogan: 'EL CANTO DE NUESTRA TIERRA',
+  slogan: 'Programa de música y cultura del py con Rubén Sosa',
   stream_url: 'https://stream.zeno.fm/fvrx452718quv',
-  whatsapp_number: '595981123456',
+  whatsapp_number: '595985160699',
   whatsapp_message: '¡Hola! Estoy escuchando La Hora del Zorzal y quisiera comunicarme con ustedes.',
+  player_title: 'SEÑAL EN DIRECTO',
+  player_subtitle: '24 hs con lo mejor del folklore paraguayo',
 };
 
 export default function App() {
@@ -197,6 +199,17 @@ export default function App() {
     }
   };
 
+  // Dynamically inject custom theme colors into CSS variables
+  useEffect(() => {
+    const root = document.documentElement;
+    if (config.color_primary) {
+      root.style.setProperty('--color-bordo', config.color_primary);
+    }
+    if (config.color_accent) {
+      root.style.setProperty('--color-dorado', config.color_accent);
+    }
+  }, [config.color_primary, config.color_accent]);
+
   // -------------------------------------------------------------
   // VIEW: HIDDEN ADMIN ROUTE (/admin)
   // -------------------------------------------------------------
@@ -216,13 +229,34 @@ export default function App() {
   // VIEW: PUBLIC NO-SCROLL / RESPONSIVE RADIO PAGE (/)
   // -------------------------------------------------------------
   return (
-    <div className="min-h-screen lg:h-screen bg-[#121013] text-[#FAF7F2] flex flex-col justify-between font-sans selection:bg-[#D4AF37]/30 selection:text-[#FAF7F2] overflow-x-hidden">
+    <div className="relative min-h-screen lg:h-screen bg-[#121013] text-[#FAF7F2] flex flex-col justify-between font-sans selection:bg-[#D4AF37]/30 selection:text-[#FAF7F2] overflow-x-hidden">
       
+      {/* Fixed Responsive Background Image with dynamic URL & Opacity */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {config.background_url ? (
+          <img
+            src={config.background_url}
+            alt=""
+            aria-hidden="true"
+            style={{ opacity: (config.background_opacity ?? 25) / 100 }}
+            className="w-full h-full object-cover object-center filter brightness-90 contrast-115 scale-[1.02] transition-opacity duration-1000"
+          />
+        ) : null}
+        {/* Gradients to guarantee high contrast and legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#121013] via-[#121013]/75 to-[#121013]/90" />
+        <div
+          className="absolute inset-0 bg-radial via-transparent to-[#121013]/80"
+          style={{ backgroundColor: `${config.color_primary || '#4A0E17'}20` }}
+        />
+      </div>
+
       {/* Header (No visible admin link) */}
-      <Header isPlaying={status === 'playing'} />
+      <div className="relative z-10">
+        <Header config={config} isPlaying={status === 'playing'} />
+      </div>
 
       {/* Main Broadcast Experience: Player & WhatsApp Side-by-Side */}
-      <main className="flex-1 flex flex-col justify-center my-auto w-full">
+      <main className="relative z-10 flex-1 flex flex-col justify-center my-auto w-full">
         <MainBroadcastView
           config={config}
           status={status}
@@ -237,7 +271,9 @@ export default function App() {
       </main>
 
       {/* Clean Minimal Footer (No visible admin link) */}
-      <Footer config={config} />
+      <div className="relative z-10">
+        <Footer config={config} />
+      </div>
 
     </div>
   );

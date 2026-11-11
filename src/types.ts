@@ -5,6 +5,13 @@ export interface RadioConfig {
   stream_url: string;
   whatsapp_number: string;
   whatsapp_message: string;
+  background_url?: string;
+  background_opacity?: number;
+  logo_url?: string;
+  color_primary?: string;
+  color_accent?: string;
+  player_title?: string;
+  player_subtitle?: string;
   updated_at?: string;
 }
 
