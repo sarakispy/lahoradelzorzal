@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-bordo: #4a0e17;
+    --color-bordo-dark: #2d080e;
+    --color-bordo-light: #6b1422;
+    --color-dorado: #d4af37;
+    --color-dorado-light: #f3e5ab;
+    --color-dorado-dark: #aa8522;
+    --color-crema: #faf7f2;
+    --color-crema-muted: #d9d2c5;
+    --color-negro: #121013;
+    --color-negro-card: #1c181e;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--color-negro);
+    color: var(--color-crema);
+  }
+
+  .font-serif-display {
+    font-family: 'Cinzel', Georgia, serif;
+  }
+
+  .font-serif-sub {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes wave-bar {
+  0%, 100% {
+    transform: scaleY(0.2);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-wave-1 {
+  animation: wave-bar 1.1s ease-in-out infinite;
+}
+.animate-wave-2 {
+  animation: wave-bar 0.9s ease-in-out infinite 0.2s;
+}
+.animate-wave-3 {
+  animation: wave-bar 1.3s ease-in-out infinite 0.4s;
+}
+.animate-wave-4 {
+  animation: wave-bar 0.8s ease-in-out infinite 0.1s;
+}
+.animate-wave-5 {
+  animation: wave-bar 1.2s ease-in-out infinite 0.3s;
+}
